@@ -12,6 +12,7 @@ class User(AbstractUser):
     phone_number = models.CharField(max_length=255, unique=True)
     is_verified_phone_number = models.BooleanField(default=False)
 
+    REQUIRED_FIELDS = ['phone_number', 'email',]
 
 # class PhoneNumberVerification(models.Model):
 #     code = models.UUIDField(unique=True)
