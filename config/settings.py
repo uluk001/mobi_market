@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-bsyleutthi0koyu6#j)s-)l2(xzdw#90(jtvzcln%u@f+)=wye
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -39,11 +39,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # Third party
     'rest_framework',
     'rest_framework.authtoken',
     'djoser',
     'drf_yasg',
+    'corsheaders',
 
+    # Local
     'accounts',
     'products',
     'favorites',
@@ -52,6 +55,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -81,6 +85,13 @@ TEMPLATES = [
             ],
         },
     },
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8080",
+    "http://localhost:3000",
+    "http://localhost:5000",
+    "http://127.0.0.1:9000",
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
