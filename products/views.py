@@ -1,3 +1,4 @@
+from django.db.models import Count
 from .serializers import *
 from rest_framework import generics, status
 from .models import Product
@@ -9,8 +10,10 @@ from rest_framework.permissions import IsAuthenticated
 
 class ProductListView(generics.ListAPIView):
     serializer_class = ProductSerializer
-    queryset = Product.objects.all()
 
+    def get_queryset(self):
+        queryset = Product.objects.annotate(like_count=Count('favoriteproducts__user', distinct=True))
+        return queryset
 
 class MyProductsView(generics.ListAPIView):
     serializer_class = ProductSerializer
@@ -38,3 +41,4 @@ class CreateProductView(APIView):
             serializer.save(owner=request.user)
             return Response({'reply': 'Product added'})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    

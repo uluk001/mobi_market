@@ -1,10 +1,9 @@
 
-from django.urls import path, include, re_path
-from .views import AddToFavoriteView, FavoriteProductsListView, FavoriteProductDeleteView
+from django.urls import path
+from .views import FavoriteProductsListView, FavoriteProductsToggleView
 
 
 urlpatterns = [
-    path('add/<int:product_id>/', AddToFavoriteView.as_view(), name='add_to_favorite'),
     path('list/', FavoriteProductsListView.as_view(), name='list'),
-    path('delete/<int:favorite_product_id>/', FavoriteProductDeleteView.as_view(), name='favorite_product_delete'),
+    path('toggle_favorite/<int:product_id>', FavoriteProductsToggleView.as_view(), name='toggle_favorite'),
 ]

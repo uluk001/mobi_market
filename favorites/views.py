@@ -7,27 +7,21 @@ from products.models import Product
 from products.serializers import ProductSerializer
 from .models import FavoriteProducts
 
-class AddToFavoriteView(APIView):
 
-    permission_classes = [IsAuthenticated]
-
+class FavoriteProductsToggleView(APIView):
     def post(self, request, product_id):
-        try:
-            product = Product.objects.get(id=product_id)
-        except Product.DoesNotExist:
-            return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
-        
-        data = {
-            'product': product_id,
-        }
-        serializer = FavoriteProductsSerializer(data=data, context={'request': request})
+        product = Product.objects.get(pk=product_id)
+        user = request.user
 
-        if serializer.is_valid():
-            serializer.save()
-            return Response("Product added to favorites", status=status.HTTP_201_CREATED)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+        try:
+            favorite_product = FavoriteProducts.objects.get(product=product, user=user)
+            favorite_product.delete()
+            return Response({"message": "Product removed from favorites"}, status=status.HTTP_200_OK)
+        except FavoriteProducts.DoesNotExist:
+            favorite_product = FavoriteProducts(product=product, user=user)
+            favorite_product.save()
+            return Response({"message": "Product added to favorites"}, status=status.HTTP_201_CREATED)
+
 
 
 class FavoriteProductsListView(APIView):
@@ -42,18 +36,5 @@ class FavoriteProductsListView(APIView):
             product = Product.objects.get(id=favorite_product['product'])
             product_serializer = ProductSerializer(product)
             favorite_product['product'] = product_serializer.data
-            
 
         return Response(favorite_products_data, status=status.HTTP_200_OK)
-
-
-
-class FavoriteProductDeleteView(APIView):
-    def delete(self, request, favorite_product_id):
-        try:
-            favorite_product = FavoriteProducts.objects.get(id=favorite_product_id, user=request.user)
-        except FavoriteProducts.DoesNotExist:
-            return Response({'error': 'Favorite product not found'}, status=status.HTTP_404_NOT_FOUND)
-        
-        favorite_product.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)

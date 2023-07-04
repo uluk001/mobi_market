@@ -1,13 +1,15 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
 from .models import Product
+from accounts.serializers import UserSerializer
+
 
 class ProductSerializer(serializers.ModelSerializer):
-    owner = serializers.SerializerMethodField()
+    owner = UserSerializer()
+    like_count = serializers.IntegerField()
 
     class Meta:
         model = Product
-        fields = ['title', 'description', 'price', 'image', 'owner']
+        fields = '__all__'
 
     def get_owner(self, obj):
         if 'request' in self.context:
