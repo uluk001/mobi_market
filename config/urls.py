@@ -23,6 +23,8 @@ from drf_yasg import openapi
 from config.settings import MEDIA_ROOT, MEDIA_URL
 from django.conf.urls.static import static
 
+import djoser.views
+
 # DRF_YASG
 schema_view = get_schema_view(
    openapi.Info(
@@ -38,6 +40,7 @@ schema_view = get_schema_view(
 )
 
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('djoser.urls')),
@@ -51,6 +54,7 @@ urlpatterns = [
     #Local
     path('products/', include('products.urls')),
     path('favorite/', include('favorites.urls')),
+    path('auth/', include('accounts.urls')),
 ]
 
 

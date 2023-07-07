@@ -97,6 +97,8 @@ CORS_ALLOWED_ORIGINS = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
+DOMAIN_NAME = 'http://127.0.0.1:8000/'
+
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
@@ -125,6 +127,18 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+DJOSER = {
+    'DOMAIN': 'frontend.com',
+    'SITE_NAME': 'Frontend',
+    'PASSWORD_RESET_CONFIRM_RETYPE': True,
+    'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
+    'SET_PASSWORD_RETYPE': True,
+    'ACTIVATION_URL': '#/activate/{uid}/{token}',
+    'SEND_ACTIVATION_EMAIL': True,
+    'PASSWORD_VALIDATORS': [],
+    'SERIALIZERS': {},
+}
 
 
 # Internationalization
@@ -159,12 +173,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'accounts.User'
 
+SITE_ID = 1 
 
 # smtp settings
-
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'eca.kg.adm@gmail.com'
 EMAIL_HOST_PASSWORD = 'pdszxxvolwaujdqa'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
