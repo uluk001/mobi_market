@@ -6,10 +6,9 @@ from django.utils.timezone import now
 
 
 class User(AbstractUser):
-    phone_number = models.CharField(max_length=255, unique=True)
     is_verified_email = models.BooleanField(default=False)
 
-    REQUIRED_FIELDS = ['phone_number', 'email',]
+    REQUIRED_FIELDS = ['email',]
 
 class EmailVerification(models.Model):
     code = models.CharField(unique=False, max_length=4)

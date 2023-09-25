@@ -5,7 +5,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         ref_name = 'accounts_user'
-        fields = ['id', 'username', 'email', 'phone_number', 'is_verified_phone_number']
+        fields = ['id', 'username', 'email',]
 
 class EmailVerificationSerializer(serializers.ModelSerializer):
     class Meta:
