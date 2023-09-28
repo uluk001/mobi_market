@@ -1,38 +1,31 @@
-from django.conf import settings
-from django.contrib.auth.models import AbstractUser
-from django.core.mail import send_mail
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
-from django.utils.timezone import now
 
 
-class User(AbstractUser):
-    is_verified_email = models.BooleanField(default=False)
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save()
+        return user
 
-    REQUIRED_FIELDS = ['email',]
-
-class EmailVerification(models.Model):
-    code = models.CharField(unique=False, max_length=4)
-    user = models.ForeignKey(to=User, on_delete=models.CASCADE)
-    created = models.DateTimeField(auto_now_add=True)
-    expiration = models.DateTimeField()
-
-    def __str__(self):
-        return f'EmailVerification object for {self.user.email}'
-
-
-    def send_verification_email(self):
-        # link = f'users/verify/{self.user.email}/{self.code}'
-        # verification_link = f'{settings.DOMAIN_NAME} Дарова брат'
-        subject = f'Подтверждение учетной записи для {self.user.username}'
-        message = f'Код для подтверждение учетной записи:{self.code}'
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[self.user.email],
-            fail_silently=False
-        )
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(email, password, **extra_fields)
 
 
-    def is_expired(self):
-        return True if now() >= self.expiration else False
+class CustomUser(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(unique=True)
+    password = models.CharField(max_length=128)
+    token_auth = models.CharField(max_length=64, blank=True, null=True)
+
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+
+    objects = CustomUserManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+

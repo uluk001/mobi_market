@@ -2,7 +2,7 @@ from django.db.models import Count
 from .serializers import *
 from rest_framework import generics, status
 from .models import Product
-from accounts.models import User
+from accounts.models import CustomUser
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView

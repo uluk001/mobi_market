@@ -1,9 +1,12 @@
+from django.urls import path, include
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from django.urls import path
-from .views import SendVerificationCodeToEmailView, EmailVerificationView
+from .views import *
 
 
 urlpatterns = [
-    path('send_verification_code_to_email/', SendVerificationCodeToEmailView.as_view(), name='send_verification_code_to_email'),
-    path('email_verification/<str:code>/', EmailVerificationView.as_view(), name='email_verification'),
+    path('profile/', UserProfileViewSet.as_view()),
+    path('confirm_email/<str:token>/', ConfirmEmailView.as_view(), name='confirm_email'),
+    path('', TokenObtainPairView.as_view()),
+    path('api/refresh/', TokenRefreshView.as_view()),
 ]

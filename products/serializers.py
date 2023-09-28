@@ -1,10 +1,10 @@
 from rest_framework import serializers
 from .models import Product
-from accounts.serializers import UserSerializer
+from accounts.serializers import CustomUserSerializer
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    owner = UserSerializer()
+    owner = CustomUserSerializer()
     like_count = serializers.IntegerField()
 
     class Meta:

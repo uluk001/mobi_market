@@ -1,53 +1,41 @@
+from django.contrib.auth import login
+from django.contrib.auth import get_user_model
+from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework import status
+from django.shortcuts import redirect
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.http import HttpResponseRedirect
+from .serializers import CustomUserSerializer
+from rest_framework import permissions
 from rest_framework.permissions import IsAuthenticated
-from .serializers import EmailVerificationSerializer
-from .models import User, EmailVerification
-import datetime, uuid, string, random
-from django.utils.timezone import now
-from django.shortcuts import get_object_or_404
+User = get_user_model()
 
+class UserProfileViewSet(generics.ListCreateAPIView):
+    serializer_class = CustomUserSerializer
+    permission_classes = [permissions.AllowAny]
 
-class SendVerificationCodeToEmailView(APIView):
-    permission_classes = [IsAuthenticated]
+    def get_queryset(self):
+        return User.objects.filter(is_superuser=False)
 
-    def get(self, request):
-        user_id = request.user.id
-        code = ''.join(random.choices(string.octdigits, k=4))
+class ConfirmEmailView(generics.GenericAPIView):
+    @staticmethod
+    def get(request, token):
+        try:
+            user = User.objects.get(token_auth=token)
+            if user.is_active:
+                print('User is already activated')  # Отладочное сообщение
+                return Response({'detail': 'User is already activated'}, status=status.HTTP_200_OK)
 
-        user = User.objects.get(id=user_id)
-        expiration = now() + datetime.timedelta(hours=48)
-        record = EmailVerification.objects.create(code=code, user=user, expiration=expiration)
-        record.send_verification_email()
-        return Response({"message": "We have sent a 4 digit code to your email"}, status=status.HTTP_200_OK)
-
-
-
-
-        # user_id = request.user.id
-        # code = ''.join(random.choices(string.octdigits, k=4))
-
-        # user = User.objects.get(id=user_id)
-        # expiration = now() + datetime.timedelta(hours=48)
-        # record = EmailVerification.objects.create(code=code, user=user, expiration=expiration)
-        # record.send_verification_email()
-        # return Response({"message": "We have sent a 4 digit code to your email"}, status=status.HTTP_200_OK)
-
-
-class EmailVerificationView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
-        code = kwargs['code']
-        email = request.user.email
-        user = get_object_or_404(User, email=email)
-        email_verification = EmailVerification.objects.filter(user=user, code=code)
-
-        print(f'--------------------{email}----{code}-----------------')
-        if email_verification.exists() and not email_verification.first().is_expired():
-            user.is_verified_email = True
+            user.is_active = True
             user.save()
-            return Response('Электронная почта подтверждена')
-        else:
-            return Response('Попробуйте заново')
+
+            login(request, user)
+            refresh = RefreshToken.for_user(user)
+            print('Email confirmation successful')  # Отладочное сообщение
+
+            # Выполним редирект на указанный URL после успешной активации
+            return redirect('https://neobis-front-auth-three.vercel.app/')  # Замените URL на нужный
+
+        except User.DoesNotExist:
+            print('Invalid token')  # Отладочное сообщение
+            return Response({'detail': 'Invalid token'}, status=status.HTTP_404_NOT_FOUND)
