@@ -1,12 +1,18 @@
 version: '3'
 services:
   web:
+    container_name: backend
+    restart: always
     build:
       context: .
+      dockerfile: Dockerfile
+    expose:
+      - 8000
     ports:
-      - "8000:8000" # Проброс порта контейнера на хост
+      - "8000:8000"
     volumes:
-      - .:/app # Монтируем текущую директорию в контейнер
+      - .:/back_end
+
     depends_on:
       - db
   db:

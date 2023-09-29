@@ -47,7 +47,6 @@ urlpatterns = [
     #Local
     path('products/', include('products.urls')),
     path('favorite/', include('favorites.urls')),
-    path('auth/', include('accounts.urls')),
 ]
 
 
