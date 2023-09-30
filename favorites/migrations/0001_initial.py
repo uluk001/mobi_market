@@ -18,10 +18,23 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='FavoriteProducts',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='products.product')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('id',
+                 models.BigAutoField(
+                     auto_created=True,
+                     primary_key=True,
+                     serialize=False,
+                     verbose_name='ID')),
+                ('created_at',
+                 models.DateTimeField(
+                     auto_now_add=True)),
+                ('product',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.CASCADE,
+                     to='products.product')),
+                ('user',
+                 models.ForeignKey(
+                     on_delete=django.db.models.deletion.CASCADE,
+                     to=settings.AUTH_USER_MODEL)),
             ],
         ),
     ]

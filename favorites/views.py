@@ -14,14 +14,16 @@ class FavoriteProductsToggleView(APIView):
         user = request.user
 
         try:
-            favorite_product = FavoriteProducts.objects.get(product=product, user=user)
+            favorite_product = FavoriteProducts.objects.get(
+                product=product, user=user)
             favorite_product.delete()
-            return Response({"message": "Product removed from favorites"}, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "Product removed from favorites"}, status=status.HTTP_200_OK)
         except FavoriteProducts.DoesNotExist:
             favorite_product = FavoriteProducts(product=product, user=user)
             favorite_product.save()
-            return Response({"message": "Product added to favorites"}, status=status.HTTP_201_CREATED)
-
+            return Response(
+                {"message": "Product added to favorites"}, status=status.HTTP_201_CREATED)
 
 
 class FavoriteProductsListView(APIView):

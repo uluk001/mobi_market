@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 from datetime import timedelta
 from pathlib import Path
-import os
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-bsyleutthi0koyu6#j)s-)l2(xzdw#90(jtvzcln%u@f+)=wye'
+SECRET_KEY = config("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -41,11 +41,15 @@ INSTALLED_APPS = [
 
     'accounts.apps.AccountsConfig',
 
+    # Third party
     'rest_framework',
     'corsheaders',
     'drf_yasg',
     'rest_framework_simplejwt',
+    'cloudinary_storage',
+    'cloudinary',
 
+    # Local
     'products',
     'favorites',
 ]
@@ -84,6 +88,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': config('CLOUD_NAME'),
+    'API_KEY': config('CLOUD_API_KEY'),
+    'API_SECRET': config('CLOUD_API_SECRET'),
+}
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 DATABASES = {
@@ -130,9 +140,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-ru'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Bishkek'
 
 USE_I18N = True
 
@@ -142,6 +152,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+MEDIA_URL = '/media/'
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -155,17 +167,17 @@ REST_FRAMEWORK = {
     ],
 }
 
-EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-EMAIL_HOST='smtp.gmail.com'
-EMAIL_PORT='587'
-EMAIL_USE_TLS=True
-EMAIL_HOST_USER='azatss442@gmail.com'
-EMAIL_HOST_PASSWORD='udqsxekpwwttqiwe'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = '587'
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 
-EMAIL_SERVER=EMAIL_HOST_USER
-DEFAULT_FROM_EMAIL=EMAIL_HOST_USER
-EMAIL_ADMIN=['azatss442@gmail.com']
+EMAIL_SERVER = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_ADMIN = [config('EMAIL_ADMIN')]
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=120),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
@@ -205,4 +217,3 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
-
