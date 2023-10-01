@@ -9,6 +9,14 @@ from .models import FavoriteProducts
 
 
 class FavoriteProductsToggleView(APIView):
+    """
+    Toggle favorite products.
+
+    Use this endpoint to toggle favorite products.
+
+    Parameters:
+    - `product_id`: Id of the product
+    """
     def post(self, request, product_id):
         product = Product.objects.get(pk=product_id)
         user = request.user
@@ -27,6 +35,11 @@ class FavoriteProductsToggleView(APIView):
 
 
 class FavoriteProductsListView(APIView):
+    """
+    List favorite products.
+
+    Use this endpoint to list favorite products.
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):

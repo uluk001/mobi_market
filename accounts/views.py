@@ -8,7 +8,17 @@ from .serializers import CustomUserSerializer
 from rest_framework import permissions
 User = get_user_model()
 
+
 class UserProfileViewSet(generics.ListCreateAPIView):
+    """
+    List all users.
+
+    Use this endpoint to list all users.
+
+    Parameters:
+    - `username`: Username of the user
+    - `email`: Email of the user
+    """
     serializer_class = CustomUserSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -34,7 +44,16 @@ class UserProfileViewSet(generics.ListCreateAPIView):
         }
         return Response(response_data, status=status.HTTP_201_CREATED)
 
+
 class ConfirmEmailView(generics.GenericAPIView):
+    """
+    Confirm email.
+
+    Use this endpoint to confirm user email.
+
+    Parameters:
+    - `token`: Token for email confirmation
+    """
     serializer_class = serializers.Serializer  # Используем стандартный сериализатор
 
     def get(self, request, token):
