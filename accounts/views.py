@@ -1,13 +1,11 @@
-from django.contrib.auth import login
-from django.contrib.auth import get_user_model
-from rest_framework import generics, status
+from rest_framework import generics, status, serializers
 from rest_framework.response import Response
 from django.shortcuts import redirect
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import login, get_user_model
 from django.http import HttpResponseRedirect
 from .serializers import CustomUserSerializer
 from rest_framework import permissions
-from rest_framework.permissions import IsAuthenticated
 User = get_user_model()
 
 class UserProfileViewSet(generics.ListCreateAPIView):
@@ -37,10 +35,11 @@ class UserProfileViewSet(generics.ListCreateAPIView):
         return Response(response_data, status=status.HTTP_201_CREATED)
 
 class ConfirmEmailView(generics.GenericAPIView):
-    @staticmethod
-    def get(request, token):
+    serializer_class = serializers.Serializer  # Используем стандартный сериализатор
+
+    def get(self, request, token):
         try:
-            user = User.objects.get(token_auth=token)  # Используем поле 'token_auth' как ранее
+            user = User.objects.get(token_auth=token)
             if user.is_active:
                 print('User is already activated')  # Отладочное сообщение
                 return Response({'detail': 'User is already activated'}, status=status.HTTP_200_OK)

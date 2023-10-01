@@ -10,6 +10,11 @@ from rest_framework.permissions import IsAuthenticated
 
 
 class ProductListView(generics.ListAPIView):
+    """
+    List all products.
+
+    Use this endpoint to list all products.
+    """
     serializer_class = ProductSerializer
 
     def get_queryset(self):
@@ -21,6 +26,11 @@ class ProductListView(generics.ListAPIView):
 
 
 class MyProductsView(generics.ListAPIView):
+    """
+    List my products.
+
+    Use this endpoint to list all products of the current user.
+    """
     serializer_class = ProductSerializer
     queryset = Product.objects.all()
     permission_classes = [IsAuthenticated]
@@ -32,6 +42,14 @@ class MyProductsView(generics.ListAPIView):
 
 
 class DetailProductView(generics.RetrieveAPIView):
+    """
+    Retrieve a product.
+
+    Use this endpoint to retrieve a product.
+
+    Parameters:
+    - `pk`: Id of the product
+    """
     serializer_class = ProductSerializer
     queryset = Product.objects.all()
 
