@@ -21,3 +21,10 @@ class ProductSerializer(serializers.ModelSerializer):
         if request:
             validated_data['owner'] = request.user
         return super().create(validated_data)
+
+
+
+class ProductCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = '__all__'

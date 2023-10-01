@@ -37,12 +37,29 @@ class DetailProductView(generics.RetrieveAPIView):
 
 
 class CreateProductView(APIView):
-    parser_classes = (FormParser, MultiPartParser)
+    """
+    Create a new product.
+
+    Use this endpoint to create a new product.
+
+    Parameters:
+    - `title`: Title of the product
+    - `description`: Description of the product
+    - `price`: Price of the product
+    - `image`: Image of the product 
+    """
+
+    parser_classes = (MultiPartParser, FormParser)
+    serializer_class = ProductCreateSerializer
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, format=None):
-        serializer = ProductSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(owner=request.user)
-            return Response({'reply': 'Product added'})
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request, *args, **kwargs):
+        owner = request.user
+        data = request.data
+        data['owner'] = owner.id
+        product_serializer = ProductCreateSerializer(data=data)
+        if product_serializer.is_valid():
+            product_serializer.save(owner=request.user)
+            return Response(product_serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(product_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
