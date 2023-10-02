@@ -5,6 +5,7 @@ from accounts.models import CustomUser
 class Product(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
+    more_info = models.TextField(default='')
     price = models.PositiveIntegerField()
     image = models.ImageField(upload_to='image_of_products')
     owner = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE)

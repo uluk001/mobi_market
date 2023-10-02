@@ -63,6 +63,7 @@ class CreateProductView(APIView):
     Parameters:
     - `title`: Title of the product
     - `description`: Description of the product
+    - 'more_info': More info about the product
     - `price`: Price of the product
     - `image`: Image of the product 
     """
@@ -81,3 +82,5 @@ class CreateProductView(APIView):
             return Response(product_serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(product_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
