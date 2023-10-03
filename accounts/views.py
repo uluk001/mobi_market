@@ -3,9 +3,12 @@ from rest_framework.response import Response
 from django.shortcuts import redirect
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import login, get_user_model
-from django.http import HttpResponseRedirect
-from .serializers import CustomUserSerializer
+from .serializers import CustomUserSerializer, ConfirmPhoneNumberSerializer
 from rest_framework import permissions
+from utils.phone_number_verification import send_phone_number_verification
+from .models import CustomUser, PhoneNumberVerification
+
+
 User = get_user_model()
 
 
@@ -76,3 +79,46 @@ class ConfirmEmailView(generics.GenericAPIView):
         except User.DoesNotExist:
             print('Invalid token')  # Отладочное сообщение
             return Response({'detail': 'Invalid token'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class SendPhoneNumberVerificationView(generics.GenericAPIView):
+    """
+    Send phone number verification code.
+
+    Use this endpoint to send phone number verification code.
+    """
+
+    serializer_class = serializers.Serializer  # Используем стандартный сериализатор
+
+    def get(self, request):
+        user = request.user
+        if user.is_verified:
+            return Response({'detail': 'User is already verified'}, status=status.HTTP_200_OK)
+
+        verification = send_phone_number_verification(user.id)
+        return Response({'detail': 'Verification code sent'}, status=status.HTTP_200_OK)
+
+
+class PhoneNumberVerificationView(generics.GenericAPIView):
+    """
+    Confirm phone number.
+
+    Use this endpoint to confirm user phone number.
+
+    Parameters:
+    - `code`: Code for phone number confirmation
+    """
+    serializer_class = ConfirmPhoneNumberSerializer
+
+    def post(self, request):
+        code = request.data['code']
+        print(code)
+        print(request.user.id)
+        user = CustomUser.objects.get(id=request.user.id)
+        verification = PhoneNumberVerification.objects.filter(user=user, code=code)
+        if verification.exists() and not verification.first().is_expired():
+            user.is_verified = True
+            user.save()
+            return Response({'detail': 'Phone number confirmed'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'detail': 'Invalid code'}, status=status.HTTP_400_BAD_REQUEST)

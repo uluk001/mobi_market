@@ -1,11 +1,11 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, generics
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .serializers import FavoriteProductsSerializer
 from products.models import Product
-from products.serializers import ProductSerializer
 from .models import FavoriteProducts
+from products.serializers import ProductCreateSerializer
 
 
 class FavoriteProductsToggleView(APIView):
@@ -25,6 +25,7 @@ class FavoriteProductsToggleView(APIView):
     401:
         description: Unauthorized.
     """
+
     def post(self, request, product_id):
         product = Product.objects.get(pk=product_id)
         user = request.user
@@ -61,9 +62,11 @@ class FavoriteProductsListView(APIView):
         serializer = FavoriteProductsSerializer(favorite_products, many=True)
         favorite_products_data = serializer.data
 
-        for favorite_product in favorite_products_data:
-            product = Product.objects.get(id=favorite_product['product'])
-            product_serializer = ProductSerializer(product)
-            favorite_product['product'] = product_serializer.data
+        favorite_products = {}
+        for favorite_product_data in favorite_products_data:
+            product_id = favorite_product_data['product']
+            product = Product.objects.get(pk=product_id)
+            product_serializer = ProductCreateSerializer(product)
+            favorite_products[product_id] = product_serializer.data
 
-        return Response(favorite_products_data, status=status.HTTP_200_OK)
+        return Response(favorite_products, status=status.HTTP_200_OK)

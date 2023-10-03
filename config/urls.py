@@ -57,7 +57,7 @@ urlpatterns = [
             'redoc',
             cache_timeout=0),
         name='schema-redoc'),
-        
+
     path('', include('rest_framework.urls', namespace='accounts')),
     path('auth/log/', include('rest_framework.urls')),
     path('auth/', include('accounts.urls')),

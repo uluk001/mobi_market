@@ -9,4 +9,7 @@ urlpatterns = [
     path('confirm_email/<str:token>/', ConfirmEmailView.as_view(), name='confirm_email'),
     path('', TokenObtainPairView.as_view()),
     path('api/refresh/', TokenRefreshView.as_view()),
+
+    path('send_phone_number/', SendPhoneNumberVerificationView.as_view()),
+    path('confirm_phone_number/', PhoneNumberVerificationView.as_view()), 
 ]

@@ -48,3 +48,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         send_mail(subject, message, from_email, [to_email], fail_silently=False)
 
         return user
+
+
+class ConfirmPhoneNumberSerializer(serializers.Serializer):
+    code = serializers.CharField(required=True)

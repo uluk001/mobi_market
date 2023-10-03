@@ -51,7 +51,10 @@ class MyProductsView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        queryset = Product.objects.filter(owner=user)
+        queryset = Product.objects.filter(owner=user).annotate(
+            like_count=Count(
+                'favoriteproducts__user',
+                distinct=True))
         return queryset
 
 
@@ -62,7 +65,7 @@ class DetailProductView(generics.RetrieveAPIView):
     Use this endpoint to retrieve a product.
 
     Parameters:
-    - `pk`: Id of the product
+    - `id`: Id of the product
 
     Responses:
     200:
@@ -71,7 +74,14 @@ class DetailProductView(generics.RetrieveAPIView):
         description: Product not found.
     """
     serializer_class = ProductSerializer
-    queryset = Product.objects.all()
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        obj = Product.objects.filter(id=id).annotate(
+            like_count=Count(
+                'favoriteproducts__user',
+                distinct=True))
+        return obj
 
 
 class CreateProductView(APIView):
@@ -107,9 +117,13 @@ class CreateProductView(APIView):
         product_serializer = ProductCreateSerializer(data=data)
         if product_serializer.is_valid():
             product_serializer.save(owner=request.user)
-            return Response(product_serializer.data, status=status.HTTP_201_CREATED)
+            return Response(
+                product_serializer.data,
+                status=status.HTTP_201_CREATED)
         else:
-            return Response(product_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                product_serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST)
 
 
 class UpdateProductView(generics.UpdateAPIView):
@@ -163,5 +177,6 @@ class DeleteProductView(generics.DestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         response = super().destroy(request, *args, **kwargs)
         if response.status_code == 204:
-            return Response({"message": "Product deleted successfully."}, status=response.status_code)
+            return Response(
+                {"message": "Product deleted successfully."}, status=response.status_code)
         return response
