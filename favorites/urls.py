@@ -7,9 +7,9 @@ urlpatterns = [
     path(
         'list/',
         FavoriteProductsListView.as_view(),
-        name='list'),
+        name='list'), # /favorite/list/
     path(
         'toggle_favorite/<int:product_id>',
         FavoriteProductsToggleView.as_view(),
-        name='toggle_favorite'),
+        name='toggle_favorite'), # /favorite/toggle_favorite/1
 ]

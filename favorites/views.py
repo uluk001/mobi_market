@@ -10,12 +10,20 @@ from .models import FavoriteProducts
 
 class FavoriteProductsToggleView(APIView):
     """
-    Toggle favorite products.
+    Toggle favorite product.
 
-    Use this endpoint to toggle favorite products.
+    Use this endpoint to toggle favorite product.
 
     Parameters:
     - `product_id`: Id of the product
+
+    Responses:
+    201:
+        description: Product added to favorites.
+    200:
+        description: Product removed from favorites.
+    401:
+        description: Unauthorized.
     """
     def post(self, request, product_id):
         product = Product.objects.get(pk=product_id)
@@ -36,9 +44,15 @@ class FavoriteProductsToggleView(APIView):
 
 class FavoriteProductsListView(APIView):
     """
-    List favorite products.
+    Get favorite products.
 
-    Use this endpoint to list favorite products.
+    Use this endpoint to get favorite products.
+
+    Responses:
+    200:
+        description: A list of favorite products.
+    401:
+        description: Unauthorized.
     """
     permission_classes = [IsAuthenticated]
 

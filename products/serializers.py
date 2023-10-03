@@ -23,8 +23,14 @@ class ProductSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
-
 class ProductCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = '__all__'
+
+
+class ProductUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = '__all__'
+        read_only_fields = ['owner', 'like_count']

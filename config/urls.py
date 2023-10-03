@@ -38,6 +38,8 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # Third party
     path(
         'swagger<format>/',
         schema_view.without_ui(
@@ -55,9 +57,11 @@ urlpatterns = [
             'redoc',
             cache_timeout=0),
         name='schema-redoc'),
-    path('auth/', include('accounts.urls')),
+        
     path('', include('rest_framework.urls', namespace='accounts')),
     path('auth/log/', include('rest_framework.urls')),
+    path('auth/', include('accounts.urls')),
+
     # Local
     path('products/', include('products.urls')),
     path('favorite/', include('favorites.urls')),
