@@ -173,10 +173,3 @@ class DeleteProductView(generics.DestroyAPIView):
     serializer_class = ProductSerializer
     queryset = Product.objects.all()
     permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
-
-    def destroy(self, request, *args, **kwargs):
-        response = super().destroy(request, *args, **kwargs)
-        if response.status_code == 204:
-            return Response(
-                {"message": "Product deleted successfully."}, status=response.status_code)
-        return response
