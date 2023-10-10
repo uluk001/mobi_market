@@ -3,7 +3,9 @@ from .views import *
 
 
 urlpatterns = [
-    path('list/', ProductListView.as_view()),
+    path('list/', 
+        ProductListView.as_view()),
+    # /products/list/
     path(
         'my_products_list/',
         MyProductsView.as_view()),
@@ -28,4 +30,8 @@ urlpatterns = [
         'my_products/',
         MyProductsView.as_view()),
     # /products/my_products/
+    path(
+        'create_additional_image/',
+        CreateAdditionalImageView.as_view()),
+    # /products/create_additional_image/
 ]

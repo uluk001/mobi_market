@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product
+from .models import Product, AdditionalImage
 from accounts.serializers import CustomUserSerializer
 
 
@@ -30,6 +30,21 @@ class ProductCreateSerializer(serializers.ModelSerializer):
 
 
 class ProductUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = '__all__'
+        read_only_fields = ['owner', 'like_count']
+
+
+class AdditionalImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AdditionalImage
+        fields = '__all__'
+
+
+class ProductDetailSerializer(serializers.ModelSerializer):
+    additional_images = AdditionalImageSerializer(source='additionalimage_set', many=True)
+
     class Meta:
         model = Product
         fields = '__all__'

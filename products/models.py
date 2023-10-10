@@ -12,3 +12,11 @@ class Product(models.Model):
 
     def __str__(self) -> str:
         return f'{self.title}'
+
+
+class AdditionalImage(models.Model):
+    image = models.ImageField(upload_to='image_of_products')
+    product = models.ForeignKey(to=Product, on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return f'{self.product.title}'

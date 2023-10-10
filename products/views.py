@@ -17,7 +17,7 @@ class ProductListView(generics.ListAPIView):
     @swagger_auto_schema(
         operation_description="List all products.",
         responses={
-            200: "List of products.",
+            200: ProductSerializer,
             403: "Forbidden. The user does not have the required permissions.",
         }
     )
@@ -39,7 +39,7 @@ class MyProductsView(generics.ListAPIView):
     @swagger_auto_schema(
         operation_description="List all products of the user.",
         responses={
-            200: "List of products.",
+            200: ProductSerializer,
             403: "Forbidden. The user does not have the required permissions.",
         }
     )
@@ -60,29 +60,42 @@ class MyProductsView(generics.ListAPIView):
 
 
 class DetailProductView(generics.RetrieveAPIView):
-
     @swagger_auto_schema(
-        operation_description="Get a product.",\
-        manual_parameters=[
-            openapi.Parameter('id', openapi.IN_QUERY, description="Id of the product", type=openapi.TYPE_INTEGER),
-        ],
+        operation_description="Detail of a product.",
         responses={
-            200: "Product.",
+            200: ProductDetailSerializer,
+            403: "Forbidden. The user does not have the required permissions.",
             404: "Product not found."
         }
     )
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
 
-    serializer_class = ProductSerializer
+    serializer_class = ProductDetailSerializer
+    queryset = Product.objects.all()
+    permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        id = self.kwargs['id']
-        obj = Product.objects.filter(id=id).annotate(
-            like_count=Count(
-                'favoriteproducts__user',
-                distinct=True))
-        return obj
+
+class CreateAdditionalImageView(generics.CreateAPIView):
+    
+        @swagger_auto_schema(
+            operation_description="Create an additional image.",
+            manual_parameters=[
+                openapi.Parameter('image', openapi.IN_QUERY, description="Image of the product", type=openapi.TYPE_FILE),
+                openapi.Parameter('product', openapi.IN_QUERY, description="Product", type=openapi.TYPE_INTEGER),
+            ],
+            responses={
+                201: ProductDetailSerializer,
+                400: "Bad request. The request was invalid.",
+                403: "Forbidden. The user does not have the required permissions.",
+            }
+        )
+        def post(self, request, *args, **kwargs):
+            return self.create(request, *args, **kwargs)
+    
+        parser_classes = (MultiPartParser, FormParser)
+        serializer_class = AdditionalImageSerializer
+        permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
 
 
 class CreateProductView(APIView):
@@ -90,14 +103,14 @@ class CreateProductView(APIView):
     @swagger_auto_schema(
         operation_description="Create a product.",
         manual_parameters=[
-            openapi.Parameter('title', openapi.IN_QUERY, description="Title of the product", type=openapi.TYPE_STRING),
-            openapi.Parameter('description', openapi.IN_QUERY, description="Description of the product", type=openapi.TYPE_STRING),
-            openapi.Parameter('more_info', openapi.IN_QUERY, description="More info about the product", type=openapi.TYPE_STRING),
-            openapi.Parameter('price', openapi.IN_QUERY, description="Price of the product", type=openapi.TYPE_INTEGER),
-            openapi.Parameter('image', openapi.IN_QUERY, description="Image of the product", type=openapi.TYPE_FILE),
+            openapi.Parameter('title', openapi.IN_FORM, description="Title of the product", type=openapi.TYPE_STRING),
+            openapi.Parameter('description', openapi.IN_FORM, description="Description of the product", type=openapi.TYPE_STRING),
+            openapi.Parameter('more_info', openapi.IN_FORM, description="More info about the product", type=openapi.TYPE_STRING),
+            openapi.Parameter('price', openapi.IN_FORM, description="Price of the product", type=openapi.TYPE_INTEGER),
+            openapi.Parameter('image', openapi.IN_FORM, description="Image of the product", type=openapi.TYPE_FILE),
         ],
         responses={
-            201: "Product created successfully.",
+            201: ProductCreateSerializer(),
             400: "Bad request. The request was invalid.",
             403: "Forbidden. The user does not have the required permissions.",
         }
@@ -121,20 +134,6 @@ class CreateProductView(APIView):
     serializer_class = ProductCreateSerializer
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, *args, **kwargs):
-        owner = request.user
-        data = request.data.copy()
-        data['owner'] = owner.id
-        product_serializer = ProductCreateSerializer(data=data)
-        if product_serializer.is_valid():
-            product_serializer.save(owner=request.user)
-            return Response(
-                product_serializer.data,
-                status=status.HTTP_201_CREATED)
-        else:
-            return Response(
-                product_serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST)
 
 
 class UpdateProductView(generics.UpdateAPIView):
