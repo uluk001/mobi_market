@@ -25,7 +25,7 @@ urlpatterns = [
         DeleteProductView.as_view()),
     # /products/delete_product/1
     path(
-        'favorite_products/',
+        'my_products/',
         MyProductsView.as_view()),
-    # /products/favorite_products/
+    # /products/my_products/
 ]

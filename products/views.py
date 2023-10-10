@@ -9,20 +9,21 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .permissions import IsOwnerOrReadOnly
-
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 class ProductListView(generics.ListAPIView):
-    """
-    List all products.
 
-    Use this endpoint to list all products.
+    @swagger_auto_schema(
+        operation_description="List all products.",
+        responses={
+            200: "List of products.",
+            403: "Forbidden. The user does not have the required permissions.",
+        }
+    )
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
 
-    Responses:
-    200:
-        description: A list of products.
-    401:
-        description: Unauthorized.
-    """
     serializer_class = ProductSerializer
 
     def get_queryset(self):
@@ -34,17 +35,17 @@ class ProductListView(generics.ListAPIView):
 
 
 class MyProductsView(generics.ListAPIView):
-    """
-    List my products.
 
-    Use this endpoint to list all products of the current user.
-
-    Responses:
-    200:
-        description: A list of products.
-    401:
-        description: Unauthorized.
-    """
+    @swagger_auto_schema(
+        operation_description="List all products of the user.",
+        responses={
+            200: "List of products.",
+            403: "Forbidden. The user does not have the required permissions.",
+        }
+    )
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+    
     serializer_class = ProductSerializer
     queryset = Product.objects.all()
     permission_classes = [IsAuthenticated]
@@ -59,20 +60,20 @@ class MyProductsView(generics.ListAPIView):
 
 
 class DetailProductView(generics.RetrieveAPIView):
-    """
-    Retrieve a product.
 
-    Use this endpoint to retrieve a product.
+    @swagger_auto_schema(
+        operation_description="Get a product.",\
+        manual_parameters=[
+            openapi.Parameter('id', openapi.IN_QUERY, description="Id of the product", type=openapi.TYPE_INTEGER),
+        ],
+        responses={
+            200: "Product.",
+            404: "Product not found."
+        }
+    )
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
 
-    Parameters:
-    - `id`: Id of the product
-
-    Responses:
-    200:
-        description: Product retrieved successfully.
-    404:
-        description: Product not found.
-    """
     serializer_class = ProductSerializer
 
     def get_queryset(self):
@@ -85,26 +86,36 @@ class DetailProductView(generics.RetrieveAPIView):
 
 
 class CreateProductView(APIView):
-    """
-    Create a new product.
 
-    Use this endpoint to create a new product.
-
-    Parameters:
-    - `title`: Title of the product
-    - `description`: Description of the product
-    - 'more_info': More info about the product
-    - `price`: Price of the product
-    - `image`: Image of the product
-
-    Responses:
-    201:
-        description: Product created successfully.
-    400:
-        description: Bad request. The request was malformed.
-    403:
-        description: Forbidden. The user does not have the required permissions.
-    """
+    @swagger_auto_schema(
+        operation_description="Create a product.",
+        manual_parameters=[
+            openapi.Parameter('title', openapi.IN_QUERY, description="Title of the product", type=openapi.TYPE_STRING),
+            openapi.Parameter('description', openapi.IN_QUERY, description="Description of the product", type=openapi.TYPE_STRING),
+            openapi.Parameter('more_info', openapi.IN_QUERY, description="More info about the product", type=openapi.TYPE_STRING),
+            openapi.Parameter('price', openapi.IN_QUERY, description="Price of the product", type=openapi.TYPE_INTEGER),
+            openapi.Parameter('image', openapi.IN_QUERY, description="Image of the product", type=openapi.TYPE_FILE),
+        ],
+        responses={
+            201: "Product created successfully.",
+            400: "Bad request. The request was invalid.",
+            403: "Forbidden. The user does not have the required permissions.",
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        owner = request.user
+        data = request.data.copy()
+        data['owner'] = owner.id
+        product_serializer = ProductCreateSerializer(data=data)
+        if product_serializer.is_valid():
+            product_serializer.save(owner=request.user)
+            return Response(
+                product_serializer.data,
+                status=status.HTTP_201_CREATED)
+        else:
+            return Response(
+                product_serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST)
 
     parser_classes = (MultiPartParser, FormParser)
     serializer_class = ProductCreateSerializer
@@ -127,49 +138,45 @@ class CreateProductView(APIView):
 
 
 class UpdateProductView(generics.UpdateAPIView):
-    """
-    Update a product.
-
-    Use this endpoint to update a product.
-
-    Parameters:
-    - `pk`: Id of the product
-    - `title`: Title of the product
-    - `description`: Description of the product
-    - 'more_info': More info about the product
-    - `price`: Price of the product
-    - `image`: Image of the product
-
-    Responses:
-    200:
-        description: Product updated successfully.
-    403:
-        description: Forbidden. The user does not have the required permissions.
-    404:
-        description: Product not found.
-    """
     serializer_class = ProductUpdateSerializer
     queryset = Product.objects.all()
     permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
 
+    @swagger_auto_schema(
+        operation_description="Update a product.",
+        manual_parameters=[
+            openapi.Parameter('title', openapi.IN_QUERY, description="Title of the product", type=openapi.TYPE_STRING),
+            openapi.Parameter('description', openapi.IN_QUERY, description="Description of the product", type=openapi.TYPE_STRING),
+            openapi.Parameter('more_info', openapi.IN_QUERY, description="More info about the product", type=openapi.TYPE_STRING),
+            openapi.Parameter('price', openapi.IN_QUERY, description="Price of the product", type=openapi.TYPE_INTEGER),
+            openapi.Parameter('image', openapi.IN_QUERY, description="Image of the product", type=openapi.TYPE_FILE),
+        ],
+        responses={
+            200: "Product updated successfully.",
+            403: "Forbidden. The user does not have the required permissions.",
+            404: "Product not found."
+        }
+    )
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
 
 class DeleteProductView(generics.DestroyAPIView):
-    """
-    Delete a product.
 
-    Use this endpoint to delete a product.
+    @swagger_auto_schema(
+        operation_description="Delete a product.",
+        manual_parameters=[
+            openapi.Parameter('id', openapi.IN_QUERY, description="Id of the product", type=openapi.TYPE_INTEGER),
+        ],
+        responses={
+            204: "Product deleted successfully.",
+            403: "Forbidden. The user does not have the required permissions.",
+            404: "Product not found."
+        }
+    )
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
 
-    Parameters:
-    - `pk`: Id of the product
-
-    Responses:
-    204:
-        description: Product deleted successfully.
-    403:
-        description: Forbidden. The user does not have the required permissions.
-    404:
-        description: Product not found.
-    """
     serializer_class = ProductSerializer
     queryset = Product.objects.all()
     permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]

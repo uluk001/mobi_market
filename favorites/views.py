@@ -6,29 +6,34 @@ from .serializers import FavoriteProductsSerializer
 from products.models import Product
 from .models import FavoriteProducts
 from products.serializers import ProductCreateSerializer
+from accounts.models import CustomUser
+from drf_yasg.utils import swagger_auto_schema
 
 
 class FavoriteProductsToggleView(APIView):
-    """
-    Toggle favorite product.
 
-    Use this endpoint to toggle favorite product.
-
-    Parameters:
-    - `product_id`: Id of the product
-
-    Responses:
-    201:
-        description: Product added to favorites.
-    200:
-        description: Product removed from favorites.
-    401:
-        description: Unauthorized.
-    """
+    @swagger_auto_schema(
+        operation_description="Toggle favorite product.",
+        responses={
+            200: "Product removed from favorites.",
+            201: "Product added to favorites.",
+            403: "Forbidden. The user does not have the required permissions.",
+        }
+    )
 
     def post(self, request, product_id):
-        product = Product.objects.get(pk=product_id)
-        user = request.user
+        try:
+            product = Product.objects.get(pk=product_id)
+        except Product.DoesNotExist:
+            return Response(
+                {"message": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            user = CustomUser.objects.get(pk=request.user.id)
+            print(user)
+            print(request.user.id)
+        except CustomUser.DoesNotExist:
+            return Response(
+                {"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
         try:
             favorite_product = FavoriteProducts.objects.get(
@@ -44,21 +49,33 @@ class FavoriteProductsToggleView(APIView):
 
 
 class FavoriteProductsListView(APIView):
-    """
-    Get favorite products.
 
-    Use this endpoint to get favorite products.
+    @swagger_auto_schema(
+        operation_description="List all favorite products.",
+        responses={
+            200: "List of favorite products.",
+            403: "Forbidden. The user does not have the required permissions.",
+        }
+    )
+    def get(self, request):
+        try:
+            user = CustomUser.objects.get(pk=request.user.id)
+        except CustomUser.DoesNotExist:
+            return Response(
+                {"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        favorite_products = FavoriteProducts.objects.filter(user=user)
+        serializer = FavoriteProductsSerializer(favorite_products, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    Responses:
-    200:
-        description: A list of favorite products.
-    401:
-        description: Unauthorized.
-    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        favorite_products = FavoriteProducts.objects.filter(user=request.user)
+        try:
+            user = CustomUser.objects.get(pk=request.user.id)
+        except CustomUser.DoesNotExist:
+            return Response(
+                {"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        favorite_products = FavoriteProducts.objects.filter(user=user)
         serializer = FavoriteProductsSerializer(favorite_products, many=True)
         favorite_products_data = serializer.data
 
